@@ -1,0 +1,15 @@
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+help: prints all the possible commands 
+add [task]: adds the task to the tracker 
+update [index] [new_task]: updates the task at the given position
+mark [index] [completion_state]: modifies the state of the task at the given index
+delete [index]: deletes the task at the given index
+delete_date [date] [status]/all: deletes all the tasks from the tracker at the given date
+show all: shows all the tasks
+show done:
+show to do:
+show in progress:
+show [date] [status]:
+sort lex/date: sorts the tasks in alfabetic order (-a) or in relation to the date form the last update (-d)
+end: ends the program
+\/\/\/\/\/\/\/\/\/\/\/\/\/\/

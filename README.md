@@ -18,9 +18,11 @@ done → Task is completed.
 
 The tracker uses the YYYY/MM/DD format for dates.
 
-Features
+**Features:**
 
 ✅ Add, update, and delete tasks
 ✅ Mark tasks as to do, in progress, or done
 ✅ View tasks based on their status or date
 ✅ Sort tasks alphabetically or by last edited date
+
+The project was also used as a solution for the https://roadmap.sh/projects/task-tracker

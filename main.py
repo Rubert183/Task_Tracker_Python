@@ -2,9 +2,15 @@ import re
 import json
 import datetime
 def invalid_use_error(command: str) -> None:
-    if re.search(r'^help/s+', command) or re.fullmatch(r'add', command) or re.search(r'^end/s+', command) \
+    if re.search(r'^help\s+', command) or re.fullmatch(r'add', command) or re.search(r'^end/s+', command) \
     or re.fullmatch(r'update', command) or re.fullmatch(r'mark', command) or re.fullmatch(r'delete', command) \
-    or re.fullmatch(r'show', command) or re.fullmatch(r'delete_date', command):
+    or re.fullmatch(r'show', command) or re.fullmatch(r'delete_date', command) or re.fullmatch(r'sort', command):
+        return True
+    return False
+
+def invalid_use_error_parameters(obj, command: str) -> bool:
+    if obj is None:
+        print(f"Error:Invalid use of the {command} commnad")
         return True
     return False
 
@@ -33,11 +39,19 @@ def search_index(string: str) -> int:
         index = -1
     return index
 
+def invalid_date(date: str) -> bool:
+        if len(date) != 10 or date[4] != '/' or date[7] != '/' or index_error(search_index(date[:4]), 9999) \
+        or index_error(search_index(date[5:7]), 12) or index_error(search_index(date[8:]), 31): 
+            print("Error: Invalid given date format")
+            return True
+        return False
+
 def add_task(task: dict, command: str) -> None:
     segment = re.search(r'^add\s+', command)
     command = command[segment.end():]
     if not invalid_given_task_error(command):
         command = command[1:(len(command)-1)]
+        command = command.rstrip().lstrip()
         task["cnt"]+=1
         new_task = {
             'id': datetime.datetime.now().strftime('%d-%m-%Y-%H-%M-%S'),
@@ -47,27 +61,32 @@ def add_task(task: dict, command: str) -> None:
             'edited': datetime.date.today().strftime('%Y/%m/%d')
         }
         task["tasks"].append(new_task)
+        print(f'The task "{command}" is now tracked')
 
 def update_task(task: dict, command: str) -> None:
     segment = re.search(r'^update\s+', command)
     command = command[segment.end():]
     segment = re.search(r'\s+', command)
-    if not invalid_given_task_error(command[segment.end():]):
-        index = search_index(command[:(segment.start()-1)].rstrip())
-        if not index_error(index, task["cnt"]):
-            index-=1
-            command = command[segment.end()+1:len(command)-1]
-            task["tasks"][index]["description"] = command
-            task["tasks"][index]["edited"] = datetime.date.today().strftime('%Y/%m/%d')
+    if invalid_use_error_parameters(segment, 'update'):
+        return
+    index: int = search_index(command[:segment.start()])
+    if not (index_error(index) and invalid_given_task_error(command[segment.end():])):
+        index-=1
+        print(f'The "{task['tasks'][index]['description']}" task is now "{command[segment.end():]}"')
+        task["tasks"][index]["description"] = command[segment.end():]
+        task["tasks"][index]["edited"] = datetime.date.today().strftime('%Y/%m/%d')
 
 def mark_task(task: dict, command: str) -> None:
     segment = re.search(r'^mark\s+', command)
     command = command[segment.end():]
     segment = re.search(r'\s+', command)
+    if invalid_use_error_parameters(segment, 'mark'):
+        return
     index = search_index(command[:segment.start()])
     if not index_error(index, task["cnt"]):
         index-=1
         if not invalid_given_status_error(command[segment.end():]):
+            print(f'The "{task['tasks'][index]['description']}" task is now marked as "{command[segment.end():]}"')
             task["tasks"][index]["status"] = command[segment.end():]
             task["tasks"][index]["edited"] = datetime.date.today().strftime('%Y/%m/%d')
 
@@ -76,6 +95,7 @@ def delete_task(task: dict, command: str) -> None:
     index = search_index(command[segment.end():])
     if not index_error(index, task['cnt']):
         index-=1
+        print(f'The "{task['tasks'][index]['description']}" task has been deleted')
         del task["tasks"][index]
         task['cnt']-=1
 
@@ -84,7 +104,7 @@ def show_a_type_a_task(task: dict, func, exception_message: str) -> None:
     for current_task in task["tasks"]:
         if func(current_task):
             found = True
-            print(current_task['description'])
+            print('~',current_task['description'])
     if not found:
         print(exception_message)
 
@@ -105,8 +125,12 @@ def show_tasks(task: dict, command: str) -> None:
         return
     elif command[0] >= '0' and command[0] <= '9':
         segment = re.search(r'\s+', command)
+        if invalid_use_error_parameters(segment, 'show'):
+            return
         given_status: str = command[segment.end():]
         given_date: str = command[:segment.start()]
+        if invalid_date(given_date):
+            return
         if given_status == 'done':
             show_a_type_a_task(task, lambda ctask: ctask['status'] == given_status and ctask['edited'] == given_date, "There are no \
             completed tasks in the tracking list at the given date")
@@ -125,12 +149,12 @@ def delete_tasks_by_date(task: dict, command: str) -> None:
     segment = re.search(r'delete_date\s+', command)
     command = command[segment.end():]
     segment = re.search(r'\s+', command)
-    if segment is None:
-        print("Error: Invalid use of the delete_date command")
+    if invalid_use_error_parameters(segment, 'delete_date'):
         return
     given_status: str = command[segment.end():]
     given_date: str = command[:segment.start()]
-
+    if invalid_date(given_date):
+        return
     if not (given_status == 'done' or given_status == 'to do' or given_status == 'in progress' or given_status == 'all'):
         print("Error: Invalid given delete_date second parameter")
         return 
@@ -157,7 +181,7 @@ def sort_tasks(task: dict, command: str) -> None:
     if command == 'lex':
         sort_by_cond(task, lambda task1, task2: task1['description'] > task2['description'])
     elif command == 'date':
-        sort_by_cond(task, lambda task1, task2: task1['date'] > task2['date'])
+        sort_by_cond(task, lambda task1, task2: task1['edited'] > task2['edited'])
     else:
         print("Error: Invalid given parameter")
 

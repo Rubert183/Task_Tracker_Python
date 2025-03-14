@@ -1,15 +1,15 @@
-/\/\/\/\/\/\/\/\/\/\/\/\/\/\
-help: prints all the possible commands 
-add [task]: adds the task to the tracker 
-update [index] [new_task]: updates the task at the given position
-mark [index] [completion_state]: modifies the state of the task at the given index
-delete [index]: deletes the task at the given index
-delete_date [date] [status]/all: deletes all the tasks from the tracker at the given date
-show all: shows all the tasks
-show done:
-show to do:
-show in progress:
-show [date] [status]:
-sort lex/date: sorts the tasks in alfabetic order (-a) or in relation to the date form the last update (-d)
-end: ends the program
-\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+---------
+help: Displays all available commands.
+add [task]: Adds a new task to the tracker.
+update [index] [new_task]: Updates the task at the specified index.
+mark [index] [completion_state]: Changes the completion state of the task at the specified index.
+delete [index]: Removes the task at the specified index.
+delete_date [date] [status]/all: Deletes all tasks last edited on the given date with the specified status or all tasks from that date.
+show all: Displays all tasks.
+show done: Displays all completed tasks.
+show to do: Displays all pending tasks.
+show in progress: Displays all tasks currently in progress.
+show [date] [status]: Displays all tasks last edited on the specified date with the given status.
+sort lex/date: Sorts tasks alphabetically or by the last edited date.
+end: Terminates the program.
+---------
